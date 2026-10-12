@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import './App.css'
 import heroBroomImg from './assets/nimbus_hero_broomstick.jpg'
 import notFoundBroomImg from './assets/nimbus_404_broomstick.jpg'
@@ -308,7 +309,13 @@ function App() {
   const handleStorageMouseLeave = useCallback(() => {
     storageCloseTimerRef.current = setTimeout(() => {
       setStorageDropdownOpen(false)
-    }, 150)
+    }, 180)
+  }, [])
+
+  const handleStorageBlur = useCallback((e) => {
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setStorageDropdownOpen(false)
+    }
   }, [])
 
   // -----------------------------------------------------------
@@ -762,6 +769,8 @@ function App() {
             className={`nav-dropdown-wrap ${storageDropdownOpen ? 'open' : ''}`}
             onMouseEnter={handleStorageMouseEnter}
             onMouseLeave={handleStorageMouseLeave}
+            onFocus={handleStorageMouseEnter}
+            onBlur={handleStorageBlur}
           >
             <button
               type="button"
@@ -769,12 +778,7 @@ function App() {
               aria-expanded={storageDropdownOpen}
               aria-haspopup="true"
               onClick={(e) => {
-                e.stopPropagation()
-                if (storageCloseTimerRef.current) {
-                  clearTimeout(storageCloseTimerRef.current)
-                  storageCloseTimerRef.current = null
-                }
-                setStorageDropdownOpen((prev) => !prev)
+                e.preventDefault()
               }}
             >
               <span>Storage</span>
@@ -2289,64 +2293,180 @@ function RowActionsMenu({
   onDelete,
 }) {
   const [open, setOpen] = useState(false)
+  const [position, setPosition] = useState({
+    top: null,
+    bottom: null,
+    left: null,
+    right: null,
+    placement: 'down',
+  })
+  const triggerRef = useRef(null)
+  const menuRef = useRef(null)
+
+  const updatePosition = useCallback(() => {
+    if (!triggerRef.current) return
+    const rect = triggerRef.current.getBoundingClientRect()
+
+    // Dismiss if trigger button scrolled completely outside viewport
+    if (rect.bottom < 0 || rect.top > window.innerHeight) {
+      setOpen(false)
+      return
+    }
+
+    const spaceBelow = window.innerHeight - rect.bottom
+    const spaceAbove = rect.top
+    const menuHeight = menuRef.current?.offsetHeight || 170
+    const minSpace = Math.max(190, menuHeight + 12)
+    const placeUp = spaceBelow < minSpace && spaceAbove > spaceBelow
+
+    const rightDist = window.innerWidth - rect.right
+    const fitsRight = (rect.right - 170) >= 8
+
+    setPosition({
+      placement: placeUp ? 'up' : 'down',
+      top: placeUp ? null : Math.round(rect.bottom + 4),
+      bottom: placeUp ? Math.round(window.innerHeight - rect.top + 4) : null,
+      left: !fitsRight ? Math.max(8, Math.round(rect.left)) : null,
+      right: fitsRight ? Math.max(8, Math.round(rightDist)) : null,
+    })
+  }, [])
+
+  const handleToggle = (e) => {
+    e.stopPropagation()
+    if (!open) {
+      updatePosition()
+      setOpen(true)
+    } else {
+      setOpen(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!open) return
+
+    updatePosition()
+
+    const handleScroll = () => {
+      updatePosition()
+    }
+
+    const handleResize = () => {
+      updatePosition()
+    }
+
+    const handleClickOutside = (e) => {
+      if (triggerRef.current?.contains(e.target)) return
+      if (menuRef.current?.contains(e.target)) return
+      setOpen(false)
+    }
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setOpen(false)
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, true)
+    window.addEventListener('resize', handleResize)
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('touchstart', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll, true)
+      window.removeEventListener('resize', handleResize)
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('touchstart', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [open, updatePosition])
 
   return (
-    <div
-      className="actions-menu-wrap"
-      onMouseLeave={() => setOpen(false)}
-    >
+    <div className="actions-menu-wrap">
       <button
+        ref={triggerRef}
         type="button"
-        className="three-dot-btn"
-        onClick={() => setOpen((prev) => !prev)}
+        className={`three-dot-btn ${open ? 'active' : ''}`}
+        onClick={handleToggle}
         aria-label={`Actions for ${objectName}`}
+        aria-expanded={open}
+        aria-haspopup="menu"
       >
         <DotsIcon />
       </button>
 
-      {open && (
-        <div className="actions-dropdown-popover">
-          {onPreview && (
-            <button
-              type="button"
-              className="action-menu-item"
-              onClick={() => { setOpen(false); onPreview(); }}
-            >
-              👁 Preview
-            </button>
-          )}
+      {open &&
+        createPortal(
+          <div
+            ref={menuRef}
+            className={`actions-dropdown-popover ${position.placement === 'up' ? 'placement-up' : 'placement-down'}`}
+            style={{
+              top: position.top !== null ? `${position.top}px` : undefined,
+              bottom: position.bottom !== null ? `${position.bottom}px` : undefined,
+              left: position.left !== null ? `${position.left}px` : undefined,
+              right: position.right !== null ? `${position.right}px` : undefined,
+            }}
+            role="menu"
+            aria-label={`Actions for ${objectName}`}
+          >
+            {onPreview && (
+              <button
+                type="button"
+                className="action-menu-item"
+                role="menuitem"
+                onClick={() => {
+                  setOpen(false)
+                  onPreview()
+                }}
+              >
+                👁 Preview
+              </button>
+            )}
 
-          {bucket === 'raw-zone' && onProcess && (
-            <button
-              type="button"
-              className="action-menu-item"
-              onClick={() => { setOpen(false); onProcess(); }}
-            >
-              ▶ Process File
-            </button>
-          )}
+            {bucket === 'raw-zone' && onProcess && (
+              <button
+                type="button"
+                className="action-menu-item"
+                role="menuitem"
+                onClick={() => {
+                  setOpen(false)
+                  onProcess()
+                }}
+              >
+                ▶ Process File
+              </button>
+            )}
 
-          {onDownload && (
-            <button
-              type="button"
-              className="action-menu-item"
-              onClick={() => { setOpen(false); onDownload(); }}
-            >
-              ↓ Download
-            </button>
-          )}
+            {onDownload && (
+              <button
+                type="button"
+                className="action-menu-item"
+                role="menuitem"
+                onClick={() => {
+                  setOpen(false)
+                  onDownload()
+                }}
+              >
+                ↓ Download
+              </button>
+            )}
 
-          {onDelete && (
-            <button
-              type="button"
-              className="action-menu-item danger"
-              onClick={() => { setOpen(false); onDelete(); }}
-            >
-              × Delete
-            </button>
-          )}
-        </div>
-      )}
+            {onDelete && (
+              <button
+                type="button"
+                className="action-menu-item danger"
+                role="menuitem"
+                onClick={() => {
+                  setOpen(false)
+                  onDelete()
+                }}
+              >
+                × Delete
+              </button>
+            )}
+          </div>,
+          document.body
+        )}
     </div>
   )
 }

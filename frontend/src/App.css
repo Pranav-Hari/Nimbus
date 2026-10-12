@@ -1000,16 +1000,15 @@
   cursor: pointer;
 }
 
-.three-dot-btn:hover {
+.three-dot-btn:hover,
+.three-dot-btn.active {
   background-color: var(--bg-surface-muted);
   border-color: var(--border-subtle);
   color: var(--text-main);
 }
 
 .actions-dropdown-popover {
-  position: absolute;
-  top: 100%;
-  right: 0;
+  position: fixed;
   min-width: 160px;
   background-color: var(--bg-surface);
   border: 1px solid var(--border-subtle);
@@ -1018,8 +1017,23 @@
   padding: 5px;
   display: flex;
   flex-direction: column;
-  z-index: 110;
+  z-index: 150;
   animation: fadeInDown 0.12s ease-out;
+}
+
+.actions-dropdown-popover.placement-up {
+  animation: fadeInUp 0.12s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .action-menu-item {
