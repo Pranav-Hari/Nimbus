@@ -1,0 +1,6 @@
+﻿{
+  "dataset": "sales_sample",
+  "description": "Synthetic sales data for Nimbus testing",
+  "source": "locally_generated",
+  "records": 8
+}

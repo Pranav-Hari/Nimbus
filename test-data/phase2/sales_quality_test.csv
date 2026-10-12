@@ -1,0 +1,9 @@
+﻿customer_id,city,orders,amount
+101,Chennai,2,50
+102,Vellore,4,200
+103,Chennai,3,100
+101,Chennai,2,50
+104,Hyderabad,-1,40
+105,,2,60
+106,Bengaluru,abc,70
+,Chennai,1,25

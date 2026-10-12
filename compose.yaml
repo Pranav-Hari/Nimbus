@@ -1,0 +1,17 @@
+services:
+  minio:
+    image: nimbus-minio:phase1
+    container_name: nimbus-minio
+    restart: unless-stopped
+    env_file:
+      - .env
+    command:
+      - server
+      - /data
+      - --console-address
+      - ":9001"
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - ./data/minio:/data

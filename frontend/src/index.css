@@ -1,0 +1,117 @@
+/* Nimbus — Global Reset & Theme Tokens */
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  /* Color Palette — Nimbus Light Theme */
+  --bg-app: #F4F0E8;            /* Warm off-white canvas */
+  --bg-surface: #FFFCF7;        /* Soft cream surface */
+  --bg-surface-elevated: #FFFFFF;
+  --bg-surface-subtle: #F7F3EB;
+  --bg-surface-muted: #EFE9DE;
+
+  --border-subtle: #E5DFD3;     /* Soft warm grey divider */
+  --border-strong: #D5CEBF;
+  --border-focus: #C8102E;      /* Scarlet focus */
+
+  --color-primary: #C8102E;     /* Gryffindor Scarlet */
+  --color-primary-hover: #A50D25;
+  --color-primary-light: #FDF2F4;
+  --color-primary-border: #F3C5CC;
+
+  --color-accent: #D4AF37;      /* Gryffindor Gold */
+  --color-accent-hover: #B89628;
+  --color-accent-light: #FDFBF0;
+  --color-accent-border: #EFE3B5;
+
+  --text-main: #30272A;         /* Charcoal heading and body */
+  --text-secondary: #5C5255;    /* Muted charcoal (high contrast WCAG AA) */
+  --text-muted: #7E7377;        /* Secondary notes */
+  --text-on-primary: #FFFFFF;
+  --text-on-accent: #30272A;
+
+  --color-success: #1B8354;
+  --color-success-bg: #F0F9F4;
+  --color-success-border: #C2E8D3;
+
+  --color-warning: #B36812;
+  --color-warning-bg: #FEF9EE;
+  --color-warning-border: #F7DEB0;
+
+  --color-danger: #C8102E;
+  --color-danger-bg: #FDF2F4;
+  --color-danger-border: #F3C5CC;
+
+  /* Typography Stack */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* Elevation Shadows */
+  --shadow-sm: 0 1px 3px rgba(48, 39, 42, 0.04), 0 1px 2px rgba(48, 39, 42, 0.02);
+  --shadow-md: 0 4px 12px rgba(48, 39, 42, 0.06), 0 1px 3px rgba(48, 39, 42, 0.04);
+  --shadow-lg: 0 12px 28px rgba(48, 39, 42, 0.09), 0 4px 8px rgba(48, 39, 42, 0.04);
+  --shadow-drawer: -6px 0 24px rgba(48, 39, 42, 0.08);
+
+  /* Layout Constants */
+  --topbar-height: 68px;
+  --max-content-width: 1280px;
+
+  /* Native color scheme: Light only */
+  color-scheme: light;
+  font-family: var(--font-sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  min-width: 320px;
+  min-height: 100%;
+}
+
+body {
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  line-height: 1.55;
+  font-size: 15px;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* Accessible reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
